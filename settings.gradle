@@ -1,0 +1,2 @@
+rootProject.name = "con-tac-tix"
+include ':app'
