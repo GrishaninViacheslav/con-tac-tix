@@ -30,7 +30,10 @@
         <item>Z</item>
     </string-array>
     <string name="position">%1$s%2$s</string>
+    <string name="game_history_editor">ИСТОРИЯ ПАРТИИ</string>
     <string name="change_game_history">ИЗМЕНИТЬ</string>
     <string name="copy_game_history">КОПИРОВАТЬ</string>
     <string name="cancel">ОТМЕНА</string>
+    <string name="text_copied">Скопированно в буффер</string>
+    <string name="invalid_turn">Невалидные ходы были пропущены</string>
 </resources>

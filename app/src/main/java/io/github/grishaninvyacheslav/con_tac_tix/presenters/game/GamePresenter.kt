@@ -49,9 +49,9 @@ class GamePresenter(
     private val gameFlowPresenter = GameFlowPresenter(hexGame)
     private val gameOverPathPresenter: GameOverPathPresenter = GameOverPathPresenter(hexGame)
 
-    inner class HistoryListPresenter : IHistoryListPresenter {
-        private val xAxisNumbers = App.instance.resources.getStringArray(R.array.x_axis_numbers)
+    private val xAxisNumbers = App.instance.resources.getStringArray(R.array.x_axis_numbers)
 
+    inner class HistoryListPresenter : IHistoryListPresenter {
         val currGameHistory = mutableListOf<Pair<Int, Int>>()
 
         override var itemClickListener: ((HistoryItemView) -> Unit)? = null
@@ -67,14 +67,13 @@ class GamePresenter(
                         second + 1
                     )
                 )
-                if(view.pos <= currTurnIndex){
-                    if(view.pos % 2 == 0){
+                if (view.pos <= currTurnIndex) {
+                    if (view.pos % 2 == 0) {
                         view.setColor(App.instance.getColor(R.color.blue_0))
                     } else {
                         view.setColor(App.instance.getColor(R.color.red_0))
                     }
-                }
-                else{
+                } else {
                     view.setColor(App.instance.getColor(R.color.light_gray))
                 }
             }
@@ -141,14 +140,44 @@ class GamePresenter(
         currTurnIndex = turnIndex
     }
 
-    fun resetGame(){
-        for(i in 1..hexGame.gameHistory.size){
+    fun resetGame() {
+        for (i in 1..hexGame.gameHistory.size) {
             undoTurn()
         }
     }
 
-    fun openGamesHistory(){
+    fun openGamesHistory() {
         router.navigateTo(screens.history())
+    }
+
+    fun applyGame(gameHistory: String) {
+        endHistoryEdit()
+        resetGame()
+        val gameHistoryTurns = gameHistory.replace(" ", "").toUpperCase().split(",")
+        // TODO: реализовать парсинг значений в формате 1;2
+        for (turn in gameHistoryTurns) {
+            var pos = Pair(-1, -1)
+            val posY = Regex("\\d+").find(turn)
+            if (posY != null) {
+                pos = Pair(posY.value.toInt() - 1, pos.second)
+            } else {
+                Log.d("[MYLOG]", "invalid turn: posY:$posY form turn:$turn")
+                viewState.showMessage(App.instance.getString(R.string.invalid_turn))
+                continue
+            }
+            for (value in xAxisNumbers) {
+                if (turn.substring(0, 1) == value) {
+                    pos = Pair(pos.first, xAxisNumbers.indexOf(value))
+                    break
+                }
+            }
+            if (pos.first in 0 until hexGame.gridSize && pos.second in 0 until hexGame.gridSize) {
+                makeTurn(pos)
+            } else {
+                Log.d("[MYLOG]", "invalid turn: pos:$pos form turn:$turn")
+                viewState.showMessage(App.instance.getString(R.string.invalid_turn))
+            }
+        }
     }
 
     fun backPressed(): Boolean {

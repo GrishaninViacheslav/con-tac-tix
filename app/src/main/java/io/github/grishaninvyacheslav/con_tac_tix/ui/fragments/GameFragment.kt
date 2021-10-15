@@ -9,7 +9,9 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.core.view.isVisible
+import androidx.fragment.app.DialogFragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.LinearSnapHelper
 import androidx.recyclerview.widget.RecyclerView
@@ -28,7 +30,8 @@ import java.lang.StringBuilder
 import kotlin.math.round
 
 
-class GameFragment : MvpAppCompatFragment(), GameView, BackButtonListener {
+class GameFragment : MvpAppCompatFragment(), GameView, BackButtonListener,
+    GameHistoryEditorDialog.GameHistoryEditorDialogListener {
     private var _view: FragmentGameBinding? = null
     private val view get() = _view!!
 
@@ -167,6 +170,10 @@ class GameFragment : MvpAppCompatFragment(), GameView, BackButtonListener {
         view.historyEditor.visibility = View.GONE
     }
 
+    override fun showMessage(message: String) {
+        Toast.makeText(context, message, Toast.LENGTH_LONG).show()
+    }
+
     override fun init() {
         with(view) {
             gameHistoryList.layoutManager =
@@ -179,13 +186,20 @@ class GameFragment : MvpAppCompatFragment(), GameView, BackButtonListener {
             gameHistoryList.onFlingListener = snapHelper
             editGameHistory.setOnClickListener {
                 val gameHistory = StringBuilder()
-                for(turn in presenter.historyListPresenter.currGameHistory){
-                    gameHistory.append(String.format(getString(R.string.position), xAxisNumbers[turn.first], turn.second))
-                    if(turn != presenter.historyListPresenter.currGameHistory.last()){
+                for (turn in presenter.historyListPresenter.currGameHistory) {
+                    gameHistory.append(
+                        String.format(
+                            getString(R.string.position),
+                            xAxisNumbers[turn.first],
+                            turn.second + 1
+                        )
+                    )
+                    if (turn != presenter.historyListPresenter.currGameHistory.last()) {
                         gameHistory.append(", ")
                     }
                 }
-                val dialog = GameHistoryEditorFragment.newInstance(gameHistory.toString())
+                val dialog =
+                    GameHistoryEditorDialog.newInstance(gameHistory.toString(), this@GameFragment)
                 dialog.show(requireActivity().supportFragmentManager, "GameHistoryEditorFragment")
             }
             gameHistoryList.addOnScrollListener(object : RecyclerView.OnScrollListener() {
@@ -211,7 +225,8 @@ class GameFragment : MvpAppCompatFragment(), GameView, BackButtonListener {
                             vh.itemView.getLocationOnScreen(location)
                             val x = location[0]
                             val rightSide = x + vh.itemView.width
-                            val isInMiddle = round(gameHistoryList.width * .5).toInt() in x..rightSide
+                            val isInMiddle =
+                                round(gameHistoryList.width * .5).toInt() in x..rightSide
                             Log.d(
                                 "[MYLOG]",
                                 "i: $i\ngameHistoryList.width * .5: ${gameHistoryList.width * .5}\nx: $x\nrightSide: $rightSide\nlastSelectedViewPosition: $lastSelectedViewPosition"
@@ -262,10 +277,14 @@ class GameFragment : MvpAppCompatFragment(), GameView, BackButtonListener {
         vibrator.vibrate(positions.size)
     }
 
-    override fun backPressed() = presenter.backPressed()
-
     override fun onDestroyView() {
         super.onDestroyView()
         _view = null
     }
+
+    override fun onDialogPositiveClick(gameHistory: String) {
+        presenter.applyGame(gameHistory)
+    }
+
+    override fun backPressed() = presenter.backPressed()
 }

@@ -14,4 +14,5 @@ interface GameView: MvpView{
     fun showHistoryEditor()
     fun updateHistory()
     fun closeHistoryEditor()
+    fun showMessage(message: String)
 }
