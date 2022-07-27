@@ -3,9 +3,6 @@
     Скачать: 
     <a href="https://github.com/GrishaninVyacheslav/con-tac-tix/releases/download/signed-pre-release/con-tac-tix.apk">con-tac-tix.apk</a>
   <p/>
-  <p>
-    Стек технологий: Retrofit, Kotlin Coroutines, Room, Fragments.
-  <p/>
 </b>
 <p>
 Демонстрация работы приложения: https://youtu.be/fvXm39dM1T4
